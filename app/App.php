@@ -135,7 +135,7 @@ class App
                     $this->telegram->sendMessage([
                         'chat_id' => $chat_id,
                         'parse_mode' => 'HTML',
-                        'text' => "По вышим параметрам появилось новое предложение:\n\nСтрана:".$countries_names[array_rand($countries_names)]."\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
+                        'text' => "По вышим параметрам появилось новое предложение:\n\nСтрана: ".$countries_names[array_rand($countries_names)]."\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
                     ]);
 
                     $this->telegram->sendphoto([
@@ -171,6 +171,10 @@ class App
         {
             switch($this->updates->getMessage()->getText())
             {
+                case 'Главное меню':
+                    $this->mainMenu();
+                break;
+
                 case 'Изменить свое местоположение':
 
                     $this->user->departure_city = "";
@@ -502,7 +506,17 @@ class App
 
                                         $this->sendHot($session->chat_id, 3);
 
-                                        $this->mainMenu();
+                                        $this->telegram->sendMessage([
+                                            'chat_id' => $session->chat_id,
+                                            'parse_mode' => 'HTML',
+                                            'reply_markup' => $this->telegram->replyKeyboardMarkup([
+                                                'keyboard' => [
+                                                    ['Еще'],
+                                                    ['Главное меню'],
+                                                ]
+                                            ]),
+                                            'text' => 'Нашли то, что искали или продолжаем?'
+                                        ]);
 
                                         break;
                                 }
@@ -517,8 +531,6 @@ class App
                         $this->mainMenu();
                     }
 
-
-                    //$this->mainMenu();
             }
         }
     }

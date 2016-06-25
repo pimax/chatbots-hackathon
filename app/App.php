@@ -90,7 +90,7 @@ class App
 
     }
 
-    protected function sendHot($chat_id, $limit = 1)
+    protected function sendHot($chat_id, $limit = 1, $direct = false)
     {
         $photos = [
             'http://www.tui.ru/img/0c4c8e1f-73ca-4248-8d8f-57859e185bfa/Europe/Spain/Barcelona/Costa-Brava/Lloret-De-Mar/san-juan-park.jpg',
@@ -129,13 +129,18 @@ class App
                     $tmp_title = str_replace("Горящий тур  ! Вылет ", "", $itm->getTitle());
                     $data_tmp = explode(" - ", $tmp_title);
 
-
                     $url = $this->googl->shorten($itm->getUrl());
+
+                    $msg = "";
+                    if ($direct) {
+                        $msg .= "По вышим параметрам появилось новое предложение:\n\n";
+                    }
+                    $msg .= "Страна: ".$countries_names[array_rand($countries_names)]."\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id;
 
                     $this->telegram->sendMessage([
                         'chat_id' => $chat_id,
                         'parse_mode' => 'HTML',
-                        'text' => "По вышим параметрам появилось новое предложение:\n\nСтрана: ".$countries_names[array_rand($countries_names)]."\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
+                        'text' => $msg
                     ]);
 
                     $this->telegram->sendphoto([
@@ -504,7 +509,7 @@ class App
                                         $session->current_stage = 3;
                                         $session->save();
 
-                                        $this->sendHot($session->chat_id, 3);
+                                        $this->sendHot($session->chat_id, 3, true);
 
                                         $this->telegram->sendMessage([
                                             'chat_id' => $session->chat_id,

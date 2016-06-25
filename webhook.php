@@ -10,5 +10,5 @@ require 'app/models/Member.php';
 require 'app/models/DepartureCity.php';
 require 'app/models/Subscription.php';
 
-$app = new app\App($telegram);
+$app = new app\App();
 $app->run();

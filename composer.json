@@ -1,6 +1,7 @@
 {
     "require": {
         "irazasyed/telegram-bot-sdk": "^2.0",
-        "martynbiz/php-mongo": "^0.0.0"
+        "martynbiz/php-mongo": "^0.0.0",
+        "fguillot/picofeed": "^0.1.23"
     }
 }

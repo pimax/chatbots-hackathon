@@ -105,6 +105,9 @@ class App
 
             $feed = $parser->execute();
 
+            echo '<pre>', print_r($feed->getItems()), '</pre>';
+
+
             $items = array_rand($feed->getItems());
 
             if (count($items)) {

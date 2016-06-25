@@ -153,6 +153,7 @@ class App
         if ($current_city) {
             // set user city
             $this->user->departure_city = $current_city->_id;
+            $this->user->save();
 
             // go to main menu
             $this->mainMenu();

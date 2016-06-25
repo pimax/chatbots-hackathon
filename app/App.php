@@ -330,6 +330,8 @@ class App
                             break;
 
                         }
+                    } else {
+                        $this->mainMenu();
                     }
 
 

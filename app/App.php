@@ -98,9 +98,8 @@ class App
      */
     protected function mainMenu()
     {
-        writeToLog($this->user->departure_id);
         
-        if ($this->user->departure_id)
+        if ($this->user->departure_city)
         {
             return $this->telegram->sendMessage([
                 'chat_id' => $this->updates->getMessage()->getChat()->getId(),

@@ -11,7 +11,7 @@ class Member extends Mongo
     protected static $whitelist = array(
         'chat_id',
         'name',
-        'departure_id'
+        'departure_city'
     );
 
     public function getCreatedAt()

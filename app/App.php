@@ -253,7 +253,7 @@ class App
                     }
 
 
-                    $this->mainMenu();
+                    //$this->mainMenu();
             }
         }
     }

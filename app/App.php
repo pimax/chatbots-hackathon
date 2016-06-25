@@ -49,6 +49,8 @@ class App
 
     protected $session;
 
+    protected $googl;
+
     /**
      * App constructor
      */
@@ -58,6 +60,7 @@ class App
 
         $this->telegram = new Api($this->config['token']);
         $this->db = $this->connectDB();
+        $this->googl = new GooglShortener($this->config['googl_token']);
     }
 
     /**
@@ -71,6 +74,62 @@ class App
         $this->user = $this->loadUser();
         $this->parseUserText();
     }
+
+    public function runSendTours()
+    {
+        $subscriptions = \app\model\Subscription::find();
+
+        if($subscriptions)
+        {
+            foreach ($subscriptions as $sub)
+            {
+                $this->sendHot($sub->chat_id);
+            }
+        }
+
+    }
+
+    protected function sendHot($chat_id)
+    {
+        try {
+
+            $reader = new Reader;
+            $resource = $reader->download($this->config['tours_feed']);
+
+            $parser = $reader->getParser(
+                $resource->getUrl(),
+                $resource->getContent(),
+                $resource->getEncoding()
+            );
+
+            $feed = $parser->execute();
+
+            $items = array_rand($feed->getItems());
+
+            if (count($items)) {
+                foreach ($items as $itm)
+                {
+                    $tmp_title = str_replace("Горящий тур  ! Вылет ", "", $itm->getTitle());
+                    $data_tmp = explode(" - ", $tmp_title);
+
+
+                    $url = $this->googl->shorten($itm->getUrl());
+
+                    $this->telegram->sendMessage([
+                        'chat_id' => $chat_id,
+                        'parse_mode' => 'HTML',
+                        'text' => $itm->description."<br />Вылет: ".$data_tmp[0]."<br />Цена: ".$data_tmp[1]."<br />".$url->id
+                    ]);
+
+                    break;
+                }
+            }
+        }
+        catch (Exception $e) {
+            // Do something...
+        }
+    }
+
 
     /**
      * Load System Config

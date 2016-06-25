@@ -42,7 +42,7 @@ class App
 
     /**
      * Config of the Bot
-     * 
+     *
      * @var array
      */
     protected $config = [];
@@ -76,7 +76,7 @@ class App
      */
     protected function loadConfig()
     {
-        $this->config = include '/../config.inc.php';
+        $this->config = include 'config.inc.php';
     }
 
     /**

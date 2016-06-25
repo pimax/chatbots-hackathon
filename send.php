@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
 require 'vendor/autoload.php';
-require('lib/GooglShortener.php');
+require('lib/GoogleShortener.php');
 require 'app/App.php';
 require 'app/models/Tour.php';
 require 'app/models/Member.php';

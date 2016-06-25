@@ -90,8 +90,21 @@ class App
 
     }
 
-    protected function sendHot($chat_id)
+    protected function sendHot($chat_id, $limit = 1)
     {
+        $photos = [
+            'http://www.tui.ru/img/0c4c8e1f-73ca-4248-8d8f-57859e185bfa/Europe/Spain/Barcelona/Costa-Brava/Lloret-De-Mar/san-juan-park.jpg',
+            'http://www.tui.ru/img/6e7d40fd-a73e-4e24-9852-eaae5e997c5a/Europe/Spain/Barcelona/Costa-Brava/Lloret-De-Mar/Gran-Hotel-Casino-Royal.jpg',
+            'http://www.tui.ru/img/ea916676-62a0-4fec-bf40-d900ac9e90f9/Europe/Spain/Barcelona/Costa-Dorada/fortuna-best-hotels-3.jpg'
+        ];
+
+        $countries  = \app\model\Countries::find();
+        $countries_names = [];
+        foreach ($countries as $city)
+        {
+            $countries_names[] = $city->name;
+        }
+
         try {
 
             $reader = new Reader;
@@ -107,28 +120,30 @@ class App
 
 
             $items = $feed->getItems();
-            ;
 
             if (count($items)) {
 
-                $itm = $items[array_rand($items)];
-                $tmp_title = str_replace("Горящий тур  ! Вылет ", "", $itm->getTitle());
-                $data_tmp = explode(" - ", $tmp_title);
+                for ($i = 1; $i<= $limit; $i++)
+                {
+                    $itm = $items[array_rand($items)];
+                    $tmp_title = str_replace("Горящий тур  ! Вылет ", "", $itm->getTitle());
+                    $data_tmp = explode(" - ", $tmp_title);
 
 
-                $url = $this->googl->shorten($itm->getUrl());
+                    $url = $this->googl->shorten($itm->getUrl());
 
-                $this->telegram->sendMessage([
-                    'chat_id' => $chat_id,
-                    'parse_mode' => 'HTML',
-                    'text' => "По вышим параметрам появилось новое предложение:\n\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
-                ]);
+                    $this->telegram->sendMessage([
+                        'chat_id' => $chat_id,
+                        'parse_mode' => 'HTML',
+                        'text' => "По вышим параметрам появилось новое предложение:\n\nСтрана:".$countries_names[array_rand($countries_names)]."\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
+                    ]);
 
-                $this->telegram->sendphoto([
-                    'chat_id' => $chat_id,
-                    'parse_mode' => 'HTML',
-                    'photo' => 'http://www.tui.ru/img/0c4c8e1f-73ca-4248-8d8f-57859e185bfa/Europe/Spain/Barcelona/Costa-Brava/Lloret-De-Mar/san-juan-park.jpg',
-                ]);
+                    $this->telegram->sendphoto([
+                        'chat_id' => $chat_id,
+                        'parse_mode' => 'HTML',
+                        'photo' => $photos[array_rand($photos)],
+                    ]);
+                }
             }
         }
         catch (Exception $e) {
@@ -228,6 +243,34 @@ class App
                     ]);
 
                 break;
+
+                case 'Актуальные предложения':
+
+                    $session = new \app\model\Session();
+                    $session->chat_id = $this->updates->getMessage()->getChat()->getId();
+                    $session->form_id = 'actual';
+                    $session->current_stage = 1;
+                    $session->save();
+
+                    $countries  = \app\model\Countries::find();
+                    $keyboard = [
+                        ['Все страны']
+                    ];
+                    foreach ($countries as $city)
+                    {
+                        $keyboard[] = [$city->name];
+                    }
+
+                    $this->telegram->sendMessage([
+                        'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                        'parse_mode' => 'HTML',
+                        'reply_markup' => $this->telegram->replyKeyboardMarkup([
+                            'keyboard' => $keyboard
+                        ]),
+                        'text' => 'Куда летим?'
+                    ]);
+
+                    break;
 
                 default:
 
@@ -358,6 +401,113 @@ class App
                                 }
 
                             break;
+
+                            case 'actual':
+
+                                switch ($session->current_stage)
+                                {
+                                    case 1:
+
+                                        if ($this->updates->getMessage()->getText() == 'Все страны')
+                                        {
+                                            $country_id = 0;
+                                        } else {
+                                            $country = \app\model\Countries::findOne(array(
+                                                'name' => $this->updates->getMessage()->getText(),
+                                            ));
+
+                                            $country_id = $country->_id;
+                                        }
+
+
+                                        $session->country_id = $country_id;
+                                        $session->current_stage = 2;
+                                        $session->save();
+
+                                        $this->telegram->sendMessage([
+                                            'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                                            'parse_mode' => 'HTML',
+                                            'reply_markup' => $this->telegram->replyKeyboardMarkup([
+                                                'keyboard' => [
+                                                    ['Не важно'],
+                                                    ['До 20 тыс'],
+                                                    ['20 - 50 тыс'],
+                                                    ['Выше 50 тыс']
+                                                ]
+                                            ]),
+                                            'text' => 'Выберите ценовую категорию'
+                                        ]);
+
+                                        break;
+
+                                    case 2:
+                                        switch($this->updates->getMessage()->getText())
+                                        {
+                                            case 'Не важно':
+                                                $price = 0;
+                                                break;
+                                            case 'До 20 тыс':
+                                                $price = 20;
+                                                break;
+                                            case '20 - 50 тыс':
+                                                $price = 50;
+                                                break;
+                                            case 'Выше 50 тыс':
+                                                $price = 100;
+                                                break;
+                                        }
+
+
+                                        $session->price = $price;
+                                        $session->current_stage = 3;
+                                        $session->save();
+
+                                        $this->telegram->sendMessage([
+                                            'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                                            'parse_mode' => 'HTML',
+                                            'reply_markup' => $this->telegram->replyKeyboardMarkup([
+                                                'keyboard' => [
+                                                    ['Не важно'],
+                                                    ['В ближайшие три дня'],
+                                                    ['Вылет от 3-7 дней'],
+                                                    ['Вылет от 7 дней и позже']
+                                                ]
+                                            ]),
+                                            'text' => 'Выберите время вылета'
+                                        ]);
+                                        break;
+
+                                    case 3:
+
+                                        switch($this->updates->getMessage()->getText())
+                                        {
+                                            case 'Не важно':
+                                                $date = 0;
+                                                break;
+                                            case 'В ближайшие три дня':
+                                                $date = 3;
+                                                break;
+                                            case 'Вылет от 3-7 дней':
+                                                $date = 7;
+                                                break;
+                                            case 'Вылет от 7 дней и позже':
+                                                $date = 8;
+                                                break;
+                                        }
+
+
+                                        $session->date = $date;
+                                        $session->current_stage = 3;
+                                        $session->save();
+
+                                        $this->sendHot($session->chat_id, 3);
+
+                                        $this->mainMenu();
+
+                                        break;
+                                }
+
+                                break;
 
                             default:
                                 $this->mainMenu();

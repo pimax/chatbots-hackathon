@@ -110,10 +110,11 @@ class App
                     ]);
 
                 break;
-            }
 
-            // go to main menu
-            $this->mainMenu();
+                default:
+                    // go to main menu
+                    $this->mainMenu();
+            }
         }
     }
 

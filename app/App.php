@@ -67,12 +67,26 @@ class App
     {
         $this->updates = $this->telegram->getWebhookUpdates();
 
-        writeToLog($this->updates);
+        return $this->telegram->sendMessage([
+            'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+            'parse_mode' => 'HTML',
+            'reply_markup' => $this->telegram->replyKeyboardMarkup([
+                'keyboard' => [
+                    ['Москва'],
+                    ['Санкт-Петербург'],
+                    ['Новосибирск'],
+                    ['Казань']
+                ]
+            ]),
+            'text' => 'Выберите ваш город или отправьте местоположение.'
+        ]);
+
+        //writeToLog($this->updates);
 
 
-        $this->user = $this->loadUser();
+        //$this->user = $this->loadUser();
 
-        $this->parseUserText();
+        //$this->parseUserText();
     }
 
     /**

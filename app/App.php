@@ -66,27 +66,8 @@ class App
     public function run()
     {
         $this->updates = $this->telegram->getWebhookUpdates();
-
-        return $this->telegram->sendMessage([
-            'chat_id' => $this->updates->getMessage()->getChat()->getId(),
-            'parse_mode' => 'HTML',
-            'reply_markup' => $this->telegram->replyKeyboardMarkup([
-                'keyboard' => [
-                    ['Москва'],
-                    ['Санкт-Петербург'],
-                    ['Новосибирск'],
-                    ['Казань']
-                ]
-            ]),
-            'text' => 'Выберите ваш город или отправьте местоположение.'
-        ]);
-
-        //writeToLog($this->updates);
-
-
-        //$this->user = $this->loadUser();
-
-        //$this->parseUserText();
+        $this->user = $this->loadUser();
+        $this->parseUserText();
     }
 
     /**
@@ -102,7 +83,12 @@ class App
      */
     protected function parseUserText()
     {
-        $this->checkDepartureCityInUpdates($this->updates->getMessage()->getText());
+        $city = $this->checkDepartureCityInUpdates($this->updates->getMessage()->getText());
+
+        if (!$city) {
+            // go to main menu
+            $this->mainMenu();
+        }
     }
 
     /**
@@ -168,7 +154,11 @@ class App
 
             // go to main menu
             $this->mainMenu();
+
+            return true;
         }
+
+        return false;
     }
 
     /**

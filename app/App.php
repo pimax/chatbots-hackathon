@@ -85,7 +85,33 @@ class App
     {
         $city = $this->checkDepartureCityInUpdates($this->updates->getMessage()->getText());
 
-        if (!$city) {
+        if (!$city)
+        {
+            switch($this->updates->getMessage()->getText())
+            {
+                case 'Подписка на новые предложения':
+
+                    $countries  = \app\model\Countries::find();
+                    $keyboard = [
+                        ['Все страны']
+                    ];
+                    foreach ($countries as $city)
+                    {
+                        $keyboard[] = [$city->name];
+                    }
+
+                    $this->telegram->sendMessage([
+                        'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                        'parse_mode' => 'HTML',
+                        'reply_markup' => $this->telegram->replyKeyboardMarkup([
+                            'keyboard' => $keyboard
+                        ]),
+                        'text' => 'Куда летим?'
+                    ]);
+
+                break;
+            }
+
             // go to main menu
             $this->mainMenu();
         }
@@ -98,7 +124,7 @@ class App
      */
     protected function mainMenu()
     {
-        
+
         if ($this->user->departure_city)
         {
             return $this->telegram->sendMessage([

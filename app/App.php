@@ -115,16 +115,18 @@ class App
         }
         else
         {
+            $cities  = \app\model\DepartureCity::find();
+            $keyboard = [];
+            foreach ($cities as $city)
+            {
+                $keyboard[] = [$city->name];
+            }
+
             return $this->telegram->sendMessage([
                 'chat_id' => $this->updates->getMessage()->getChat()->getId(),
                 'parse_mode' => 'HTML',
                 'reply_markup' => $this->telegram->replyKeyboardMarkup([
-                    'keyboard' => [
-                        ['Москва'],
-                        ['Санкт-Петербург'],
-                        ['Новосибирск'],
-                        ['Казань']
-                    ]
+                    'keyboard' => $keyboard
                 ]),
                 'text' => 'Выберите ваш город или отправьте местоположение.'
             ]);

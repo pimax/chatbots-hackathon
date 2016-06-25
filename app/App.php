@@ -60,7 +60,7 @@ class App
 
         $this->telegram = new Api($this->config['token']);
         $this->db = $this->connectDB();
-        $this->googl = new GooglShortener($this->config['googl_token']);
+        $this->googl = new \GooglShortener($this->config['googl_token']);
     }
 
     /**

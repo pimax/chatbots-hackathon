@@ -118,11 +118,16 @@ class App
 
                 $url = $this->googl->shorten($itm->getUrl());
 
+                $this->telegram->sendMessage([
+                    'chat_id' => $chat_id,
+                    'parse_mode' => 'HTML',
+                    'text' => "По вышим параметрам появилось новое предложение:\n\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
+                ]);
+
                 $this->telegram->sendphoto([
                     'chat_id' => $chat_id,
                     'parse_mode' => 'HTML',
                     'photo' => 'http://www.tui.ru/img/0c4c8e1f-73ca-4248-8d8f-57859e185bfa/Europe/Spain/Barcelona/Costa-Brava/Lloret-De-Mar/san-juan-park.jpg?geo=1&width=620&height=380',
-                    'caption' => "По вышим параметрам появилось новое предложение:\n\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
                 ]);
             }
         }

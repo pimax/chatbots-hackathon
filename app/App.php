@@ -104,6 +104,12 @@ class App
                         }
                     }
 
+                    $this->telegram->sendMessage([
+                        'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                        'parse_mode' => 'HTML',
+                        'text' => 'Подписка отменена. Буду ждать тебя в следующий раз!'
+                    ]);
+
                 break;
 
                 case 'Подписка на новые предложения':

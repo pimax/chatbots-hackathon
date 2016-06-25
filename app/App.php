@@ -93,7 +93,7 @@ class App
             {
                 case 'Отменить подписку на новые предложения':
 
-                    $subscriptions = \app\model\Subscription::findOne(array(
+                    $subscriptions = \app\model\Subscription::find(array(
                         'chat_id' => $this->updates->getMessage()->getChat()->getId(),
                     ));
 

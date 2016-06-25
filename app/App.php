@@ -143,7 +143,7 @@ class App
         $cities  = \app\model\DepartureCity::find();
         foreach ($cities as $city)
         {
-            if ($city == $message) {
+            if ($city->name == $message) {
                 $current_city = $city;
             }
         }

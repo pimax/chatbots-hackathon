@@ -132,7 +132,7 @@ class App
                     $url = $this->googl->shorten($itm->getUrl());
 
                     $msg = "";
-                    if ($direct) {
+                    if (!$direct) {
                         $msg .= "По вышим параметрам появилось новое предложение:\n\n";
                     }
                     $msg .= "Страна: ".$countries_names[array_rand($countries_names)]."\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id;

@@ -66,6 +66,10 @@ class App
     public function run()
     {
         $this->updates = $this->telegram->getWebhookUpdates();
+
+        writeToLog($this->updates);
+
+
         $this->user = $this->loadUser();
 
         $this->parseUserText();

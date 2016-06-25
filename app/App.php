@@ -121,7 +121,7 @@ class App
                     $this->telegram->sendMessage([
                         'chat_id' => $chat_id,
                         'parse_mode' => 'HTML',
-                        'text' => $itm->description."<br />Вылет: ".$data_tmp[0]."<br />Цена: ".$data_tmp[1]."<br />".$url->id
+                        'text' => $itm->description."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
                     ]);
 
                     break;

@@ -107,25 +107,22 @@ class App
 
 
             $items = $feed->getItems();
-            array_rand($items);
+            ;
 
             if (count($items)) {
-                foreach ($items as $itm)
-                {
-                    $tmp_title = str_replace("Горящий тур  ! Вылет ", "", $itm->getTitle());
-                    $data_tmp = explode(" - ", $tmp_title);
+
+                $itm = $items[array_rand($items)];
+                $tmp_title = str_replace("Горящий тур  ! Вылет ", "", $itm->getTitle());
+                $data_tmp = explode(" - ", $tmp_title);
 
 
-                    $url = $this->googl->shorten($itm->getUrl());
+                $url = $this->googl->shorten($itm->getUrl());
 
-                    $this->telegram->sendMessage([
-                        'chat_id' => $chat_id,
-                        'parse_mode' => 'HTML',
-                        'text' => "По вышим параметрам появилось новое предложение:\n\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
-                    ]);
-
-                    break;
-                }
+                $this->telegram->sendMessage([
+                    'chat_id' => $chat_id,
+                    'parse_mode' => 'HTML',
+                    'text' => "По вышим параметрам появилось новое предложение:\n\n".strip_tags($itm->getContent())."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
+                ]);
             }
         }
         catch (Exception $e) {

@@ -98,6 +98,8 @@ class App
      */
     protected function mainMenu()
     {
+        writeToLog($this->user->departure_id);
+        
         if ($this->user->departure_id)
         {
             return $this->telegram->sendMessage([

@@ -91,6 +91,21 @@ class App
         {
             switch($this->updates->getMessage()->getText())
             {
+                case 'Отменить подписку на новые предложения':
+
+                    $subscriptions = \app\model\Subscription::findOne(array(
+                        'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                    ));
+
+                    if($subscriptions)
+                    {
+                        foreach ($subscriptions as $sub) {
+                            $sub->delete();
+                        }
+                    }
+
+                break;
+
                 case 'Подписка на новые предложения':
 
                     $session = new \app\model\Session();
@@ -282,6 +297,7 @@ class App
                 'reply_markup' => $this->telegram->replyKeyboardMarkup([
                     'keyboard' => [
                         ['Подписка на новые предложения'],
+                        ['Отменить подписку на новые предложения'],
                         ['Актуальные предложения'],
                         ['Изменить свое местоположение'],
                     ]

@@ -156,6 +156,30 @@ class App
         {
             switch($this->updates->getMessage()->getText())
             {
+                case 'Изменить свое местоположение':
+
+                    $this->user->departure_city = "";
+                    $this->user->save();
+
+                    $cities  = \app\model\DepartureCity::find();
+                    $keyboard = [];
+                    foreach ($cities as $city)
+                    {
+                        $keyboard[] = [$city->name];
+                    }
+
+                    return $this->telegram->sendMessage([
+                        'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                        'parse_mode' => 'HTML',
+                        'reply_markup' => $this->telegram->replyKeyboardMarkup([
+                            'keyboard' => $keyboard
+                        ]),
+                        'text' => 'Выберите ваш город или отправьте местоположение.'
+                    ]);
+
+                break;
+
+
                 case 'Отменить подписку на новые предложения':
 
                     $subscriptions = \app\model\Subscription::find(array(

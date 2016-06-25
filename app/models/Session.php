@@ -4,15 +4,17 @@ namespace app\model;
 
 use MartynBiz\Mongo\Mongo;
 
-class Subscription extends Mongo
+class Session extends Mongo
 {
-    protected static $collection = 'subscriptions';
+    protected static $collection = 'session';
 
     protected static $whitelist = array(
-        'country_id',
-        'price',
-        'date',
         'chat_id',
+        'form_id',
+        'country',
+        'date',
+        'price',
+        'current_stage',
     );
 
     public function getCreatedAt()

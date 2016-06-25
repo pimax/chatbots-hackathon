@@ -47,6 +47,8 @@ class App
      */
     protected $config = [];
 
+    protected $session;
+
     /**
      * App constructor
      */
@@ -91,6 +93,12 @@ class App
             {
                 case 'Подписка на новые предложения':
 
+                    $session = new \app\model\Session();
+                    $session->chat_id = $this->updates->getMessage()->getChat()->getId();
+                    $session->form_id = 'subscription';
+                    $session->current_stage = 1;
+                    $session->save();
+
                     $countries  = \app\model\Countries::find();
                     $keyboard = [
                         ['Все страны']
@@ -112,7 +120,139 @@ class App
                 break;
 
                 default:
-                    // go to main menu
+
+                    $session = \app\model\Session::findOne(array(
+                        'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                        'created_at' => ['$gt' => new \MongoDate(time() - 300)]
+                    ));
+
+
+                    if ($session) {
+
+                        switch ($session->form_id)
+                        {
+                            case 'subscription':
+
+                                switch ($session->current_stage)
+                                {
+                                    case 1:
+
+                                        if ($this->updates->getMessage()->getText() == 'Все страны')
+                                        {
+                                            $country_id = 0;
+                                        } else {
+                                            $country = \app\model\Countries::findOne(array(
+                                                'name' => $this->updates->getMessage()->getText(),
+                                            ));
+
+                                            $country_id = $country->_id;
+                                        }
+
+
+                                        $session->country_id = $country_id;
+                                        $session->current_stage = 2;
+                                        $session->save();
+
+                                        $this->telegram->sendMessage([
+                                            'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                                            'parse_mode' => 'HTML',
+                                            'reply_markup' => $this->telegram->replyKeyboardMarkup([
+                                                'keyboard' => [
+                                                    ['Не важно'],
+                                                    ['До 20 тыс'],
+                                                    ['20 - 50 тыс'],
+                                                    ['Выше 50 тыс']
+                                                ]
+                                            ]),
+                                            'text' => 'Выберите ценовую категорию'
+                                        ]);
+
+                                    break;
+                                    
+                                    case 2:
+                                        switch($this->updates->getMessage()->getText())
+                                        {
+                                            case 'Не важно':
+                                                $price = 0;
+                                            break;
+                                            case 'До 20 тыс':
+                                                $price = 20;
+                                                break;
+                                            case '20 - 50 тыс':
+                                                $price = 50;
+                                                break;
+                                            case 'Выше 50 тыс':
+                                                $price = 100;
+                                                break;
+                                        }
+
+
+                                        $session->price = $price;
+                                        $session->current_stage = 3;
+                                        $session->save();
+
+                                        $this->telegram->sendMessage([
+                                            'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                                            'parse_mode' => 'HTML',
+                                            'reply_markup' => $this->telegram->replyKeyboardMarkup([
+                                                'keyboard' => [
+                                                    ['Не важно'],
+                                                    ['В ближайшие три дня'],
+                                                    ['Вылет от 3-7 дней'],
+                                                    ['Вылет от 7 дней и позже']
+                                                ]
+                                            ]),
+                                            'text' => 'Выберите время вылета'
+                                        ]);
+                                    break;
+
+                                    case 3:
+
+                                        switch($this->updates->getMessage()->getText())
+                                        {
+                                            case 'Не важно':
+                                                $date = 0;
+                                                break;
+                                            case 'В ближайшие три дня':
+                                                $date = 3;
+                                                break;
+                                            case 'Вылет от 3-7 дней':
+                                                $date = 7;
+                                                break;
+                                            case 'Вылет от 7 дней и позже':
+                                                $date = 8;
+                                                break;
+                                        }
+
+
+                                        $session->date = $date;
+                                        $session->current_stage = 3;
+                                        $session->save();
+
+                                        $subscription = new \app\model\Subscription();
+                                        $subscription->chat_id = $session->chat_id;
+                                        $subscription->country_id = $session->country_id;
+                                        $subscription->price = $session->price;
+                                        $subscription->date = $session->date;
+                                        $subscription->save();
+
+                                        $this->telegram->sendMessage([
+                                            'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+                                            'parse_mode' => 'HTML',
+                                            'text' => 'Готово. Теперь мы будем отправлять тебе новые предложения.'
+                                        ]);
+
+                                        $this->mainMenu();
+
+                                        break;
+                                }
+
+                            break;
+
+                        }
+                    }
+
+
                     $this->mainMenu();
             }
         }
@@ -125,6 +265,14 @@ class App
      */
     protected function mainMenu()
     {
+        $session = \app\model\Session::findOne(array(
+            'chat_id' => $this->updates->getMessage()->getChat()->getId(),
+            'created_at' => ['$gt' => new \MongoDate(time() - 300)]
+        ));
+
+        if($session) {
+            $session->delete();
+        }
 
         if ($this->user->departure_city)
         {
@@ -207,6 +355,7 @@ class App
                 'subscription' => '\\app\\model\\Subscription',
                 'departure_city' => '\\app\\model\\DepartureCity',
                 'countries' => '\\app\\model\\Countries',
+                'session' => '\\app\\model\\Session',
             ),
         ));
     }

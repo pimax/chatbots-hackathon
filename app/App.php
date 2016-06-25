@@ -329,6 +329,9 @@ class App
 
                             break;
 
+                            default:
+                                $this->mainMenu();
+
                         }
                     } else {
                         $this->mainMenu();

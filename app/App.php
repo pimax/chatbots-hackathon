@@ -63,9 +63,9 @@ class App
      *
      * @param $updates
      */
-    public function run($updates)
+    public function run()
     {
-        $this->updates = $updates;
+        $this->updates = $this->telegram->getWebhookUpdates();
         $this->user = $this->loadUser();
 
         $this->parseUserText();

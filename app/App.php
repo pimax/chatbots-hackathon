@@ -204,7 +204,8 @@ class App
                 'tour' => '\\app\\model\\Tour',
                 'member' => '\\app\\model\\Member',
                 'subscription' => '\\app\\model\\Subscription',
-                'departure_city' => '\\app\\model\\DepartureCity'
+                'departure_city' => '\\app\\model\\DepartureCity',
+                'countries' => '\\app\\model\\Countries',
             ),
         ));
     }

@@ -121,7 +121,7 @@ class App
                     $this->telegram->sendMessage([
                         'chat_id' => $chat_id,
                         'parse_mode' => 'HTML',
-                        'text' => "По вышим параметрам появилось новое предложение:\n\n".$itm->description."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
+                        'text' => "По вышим параметрам появилось новое предложение:\n\n".$itm->getContent()."\n\nВылет: ".$data_tmp[0]."\nЦена: ".$data_tmp[1]."\n".$url->id
                     ]);
 
                     break;
